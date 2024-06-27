@@ -11,6 +11,11 @@ Version 1.0.0 - Created by Michael Torres
 This is an esoteric interpreted programming language based off of rats. Refer below
 for syntax/functions:
 
+Compile with:
+RATspeak FILENAME
+use flag "-v" to visualize all objects in memory (when in this mode, hit space to "tick" forward,
+WASD to move, scroll wheel to zoom in/out, "o" to return to origin, and right-click to get mouse coords)
+
 Function declaration:
 maze FUNCNAME <
 	...
