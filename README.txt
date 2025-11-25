@@ -76,4 +76,3 @@ Notes on string connections:
 When placing any generator, it will connect to any string at its location given that the string does not have that generator type already connected
 When placing any SINGLE string (🧵<x,y>;), it connects all string at its location to itself)
 
-Example programs are provided.
