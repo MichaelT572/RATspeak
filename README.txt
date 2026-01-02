@@ -24,6 +24,9 @@ squeak <
 	...
 >
 
+Imports:
+#sniff <file_name>
+
 Objects: 🐀🧀💊🕳️🏭🧪🧱🗑🔼🧵📡☣ (Print with RATspeak -e)
 
 Built in functions:
@@ -74,4 +77,5 @@ Notes on string connections:
 When placing any generator, it will connect to any string at its location
 When placing any SINGLE string (🧵<x,y>;), it connects all string at its location to itself)
 String placed in a line connect to each other implicitely, but only the endpoints auto-connect to other string (to allow for passing lines of string past one another)
+
 
