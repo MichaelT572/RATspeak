@@ -5,8 +5,8 @@
 
 extern int VIEW_X;
 extern int VIEW_Y;
-extern int VIEW_W;
-extern int VIEW_H;
+extern const int VIEW_W;
+extern const int VIEW_H;
 
 void render();
 void clear_screen();
@@ -15,7 +15,7 @@ void clear_screen();
 #include <termios.h>
 #include <unistd.h>
 #include <fcntl.h>
-enum class Key {L, R, U, D, NEXT, QUIT, NONE};
+enum class Key {L, R, U, D, NEXT, DEBUG, QUIT, NONE};
 void init_input();
 void shutdown_input();
 Key poll_key();

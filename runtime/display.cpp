@@ -1,5 +1,12 @@
 #include "display.h"
 
+int VIEW_X;
+int VIEW_Y;
+const int VIEW_W = 40;
+const int VIEW_H = 20;
+
+std::string viewport[VIEW_W * VIEW_H];
+
 void clear_screen() {
     std::cout << "\x1b[2J\x1b[H";
 }
@@ -9,7 +16,8 @@ void hide_cursor() {
 void show_cursor() {
     std::cout << "\x1b[?25h";
 }
-std::string visible_at(int x, int y) {
+
+void render_viewport() {
     // trash
     // cheese
     // poison
@@ -22,85 +30,100 @@ std::string visible_at(int x, int y) {
     // springs
     // walls
     // strings
-    for (int i = 0; i < trash.size(); i++) {
-        Trash* t = trash[i].get();
-        if ((t->pos[0] == x) && (t->pos[1] == y)) {
-            return t->emoji;
-        }
+
+    for (int y = 0; y < VIEW_H; y++) {
+        for (int x = 0; x < VIEW_W; x++) {
+            viewport[y*VIEW_W + x] = "  ";
+        }    
     }
-    for (int i = 0; i < cheese.size(); i++) {
-        Cheese* c = cheese[i].get();
-        if ((c->pos[0] == x) && (c->pos[1] == y)) {
-            return c->emoji;
-        }
-    }
-    for (int i = 0; i < poison.size(); i++) {
-        Poison* p = poison[i].get();
-        if ((p->pos[0] == x) && (p->pos[1] == y)) {
-            return p->emoji;
-        }
-    }
-    for (int i = 0; i < rats.size(); i++) {
-        Rat* r = rats[i].get();
-        if ((r->pos[0] == x) && (r->pos[1] == y)) {
-            return r->emoji;
-        }
-    }
-    for (int i = 0; i < pills.size(); i++) {
-        Pill* p = pills[i].get();
-        if ((p->pos[0] == x) && (p->pos[1] == y)) {
-            return p->emoji;
-        }
-    }
-    for (int i = 0; i < scanners.size(); i++) {
-        Scanner* s = scanners[i].get();
-        if ((s->pos[0] == x) && (s->pos[1] == y)) {
-            return s->emoji;
-        }
-    }
-    for (int i = 0; i < ratgens.size(); i++) {
-        RatGen* rg = ratgens[i].get();
-        if ((rg->pos[0] == x) && (rg->pos[1] == y)) {
-            return rg->emoji;
-        }
-    }
-    for (int i = 0; i < cheesegens.size(); i++) {
-        CheeseGen* cg = cheesegens[i].get();
-        if ((cg->pos[0] == x) && (cg->pos[1] == y)) {
-            return cg->emoji;
-        }
-    }
-    for (int i = 0; i < pillgens.size(); i++) {
-        PillGen* pg = pillgens[i].get();
-        if ((pg->pos[0] == x) && (pg->pos[1] == y)) {
-            return pg->emoji;
-        }
-    }
-    for (int i = 0; i < springs.size(); i++) {
-        Spring* s = springs[i].get();
-        if ((s->pos[0] == x) && (s->pos[1] == y)) {
-            return s->emoji;
+
+
+
+    for (int i = 0; i < strings.size(); i++) {
+        String* s = strings[i].get();
+        if (((s->pos[0] - VIEW_X) < VIEW_W) && ((s->pos[0] - VIEW_X) >= 0) 
+        && ((s->pos[1] - VIEW_Y) < VIEW_H) && ((s->pos[1] - VIEW_Y) >= 0)) {
+            viewport[(s->pos[1] - VIEW_Y) * VIEW_W + (s->pos[0] - VIEW_X)] = s->emoji;
         }
     }
     for (int i = 0; i < walls.size(); i++) {
         Wall* wall = walls[i].get();
-        if ((wall->pos[0] == x) && (wall->pos[1] == y)) {
-            return wall->emoji;
+        if (((wall->pos[0] - VIEW_X) < VIEW_W) && ((wall->pos[0] - VIEW_X) >= 0) 
+        && ((wall->pos[1] - VIEW_Y) < VIEW_H) && ((wall->pos[1] - VIEW_Y) >= 0)) {
+            viewport[(wall->pos[1] - VIEW_Y) * VIEW_W + (wall->pos[0] - VIEW_X)] = wall->emoji;
         }
     }
-    for (int i = 0; i < strings.size(); i++) {
-        String* s = strings[i].get();
-        if ((s->pos[0] == x) && (s->pos[1] == y)) {
-            return s->emoji;
+    for (int i = 0; i < springs.size(); i++) {
+        Spring* s = springs[i].get();
+        if (((s->pos[0] - VIEW_X) < VIEW_W) && ((s->pos[0] - VIEW_X) >= 0) 
+        && ((s->pos[1] - VIEW_Y) < VIEW_H) && ((s->pos[1] - VIEW_Y) >= 0)) {
+            viewport[(s->pos[1] - VIEW_Y) * VIEW_W + (s->pos[0] - VIEW_X)] = s->emoji;
         }
     }
-    return "  ";
+    for (int i = 0; i < pillgens.size(); i++) {
+        PillGen* pg = pillgens[i].get();
+        if (((pg->pos[0] - VIEW_X) < VIEW_W) && ((pg->pos[0] - VIEW_X) >= 0) 
+        && ((pg->pos[1] - VIEW_Y) < VIEW_H) && ((pg->pos[1] - VIEW_Y) >= 0)) {
+            viewport[(pg->pos[1] - VIEW_Y) * VIEW_W + (pg->pos[0] - VIEW_X)] = pg->emoji;
+        }
+    }
+    for (int i = 0; i < cheesegens.size(); i++) {
+        CheeseGen* cg = cheesegens[i].get();
+        if (((cg->pos[0] - VIEW_X) < VIEW_W) && ((cg->pos[0] - VIEW_X) >= 0) 
+        && ((cg->pos[1] - VIEW_Y) < VIEW_H) && ((cg->pos[1] - VIEW_Y) >= 0)) {
+            viewport[(cg->pos[1] - VIEW_Y) * VIEW_W + (cg->pos[0] - VIEW_X)] = cg->emoji;
+        }
+    }
+    for (int i = 0; i < ratgens.size(); i++) {
+        RatGen* rg = ratgens[i].get();
+        if (((rg->pos[0] - VIEW_X) < VIEW_W) && ((rg->pos[0] - VIEW_X) >= 0) 
+        && ((rg->pos[1] - VIEW_Y) < VIEW_H) && ((rg->pos[1] - VIEW_Y) >= 0)) {
+            viewport[(rg->pos[1] - VIEW_Y) * VIEW_W + (rg->pos[0] - VIEW_X)] = rg->emoji;
+        }
+    }
+    for (int i = 0; i < scanners.size(); i++) {
+        Scanner* s = scanners[i].get();
+        if (((s->pos[0] - VIEW_X) < VIEW_W) && ((s->pos[0] - VIEW_X) >= 0) 
+        && ((s->pos[1] - VIEW_Y) < VIEW_H) && ((s->pos[1] - VIEW_Y) >= 0)) {
+            viewport[(s->pos[1] - VIEW_Y) * VIEW_W + (s->pos[0] - VIEW_X)] = s->emoji;
+        }
+    }
+    for (int i = 0; i < pills.size(); i++) {
+        Pill* p = pills[i].get();
+        if (((p->pos[0] - VIEW_X) < VIEW_W) && ((p->pos[0] - VIEW_X) >= 0) 
+        && ((p->pos[1] - VIEW_Y) < VIEW_H) && ((p->pos[1] - VIEW_Y) >= 0)) {
+            viewport[(p->pos[1] - VIEW_Y) * VIEW_W + (p->pos[0] - VIEW_X)] = p->emoji;
+        }
+    }
+    for (int i = 0; i < rats.size(); i++) {
+        Rat* r = rats[i].get();
+        if (((r->pos[0] - VIEW_X) < VIEW_W) && ((r->pos[0] - VIEW_X) >= 0) 
+        && ((r->pos[1] - VIEW_Y) < VIEW_H) && ((r->pos[1] - VIEW_Y) >= 0)) {
+            viewport[(r->pos[1] - VIEW_Y) * VIEW_W + (r->pos[0] - VIEW_X)] = r->emoji;
+        }
+    }
+    for (int i = 0; i < poison.size(); i++) {
+        Poison* p = poison[i].get();
+        if (((p->pos[0] - VIEW_X) < VIEW_W) && ((p->pos[0] - VIEW_X) >= 0) 
+        && ((p->pos[1] - VIEW_Y) < VIEW_H) && ((p->pos[1] - VIEW_Y) >= 0)) {
+            viewport[(p->pos[1] - VIEW_Y) * VIEW_W + (p->pos[0] - VIEW_X)] = p->emoji;
+        }
+    }
+    for (int i = 0; i < cheese.size(); i++) {
+        Cheese* c = cheese[i].get();
+        if (((c->pos[0] - VIEW_X) < VIEW_W) && ((c->pos[0] - VIEW_X) >= 0) 
+        && ((c->pos[1] - VIEW_Y) < VIEW_H) && ((c->pos[1] - VIEW_Y) >= 0)) {
+            viewport[(c->pos[1] - VIEW_Y) * VIEW_W + (c->pos[0] - VIEW_X)] = c->emoji;
+        }
+    }
+    for (int i = 0; i < trash.size(); i++) {
+        Trash* t = trash[i].get();
+        if (((t->pos[0] - VIEW_X) < VIEW_W) && ((t->pos[0] - VIEW_X) >= 0) 
+        && ((t->pos[1] - VIEW_Y) < VIEW_H) && ((t->pos[1] - VIEW_Y) >= 0)) {
+            viewport[(t->pos[1] - VIEW_Y) * VIEW_W + (t->pos[0] - VIEW_X)] = t->emoji;
+        }
+    }
 }
-
-int VIEW_X;
-int VIEW_Y;
-int VIEW_W;
-int VIEW_H;
 
 bool initialized = false;
 struct termios old_termios;
@@ -142,6 +165,8 @@ Key poll_key() {
         return Key::QUIT;
     } else if (c == ' ') {
         return Key::NEXT;
+    } else if (c == 's') {
+        return Key::DEBUG;
     } else if (c == 0x1b) {
         unsigned char seq[2];
         if ((read(STDIN_FILENO, &seq[0], 1) != 1) || (read(STDIN_FILENO, &seq[1], 1) != 1)) {
@@ -167,6 +192,8 @@ Key poll_key() {
 
 
 void render() {
+    render_viewport();
+
     hide_cursor();
 
     std::cout << "\n";
@@ -178,7 +205,7 @@ void render() {
     for (int y = VIEW_H - 1; y >= 0; y--) {
         std::cout << "⬜";
         for (int x = 0; x < VIEW_W; x++) {
-            std::cout << visible_at(x + VIEW_X, y + VIEW_Y);
+            std::cout << viewport[VIEW_W * y + x];
         }
         std::cout << "⬜\n";
     }

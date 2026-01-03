@@ -709,8 +709,6 @@ void run(bool visualize) {
 
     VIEW_X = 0;
     VIEW_Y = 0;
-    VIEW_W = 40;
-    VIEW_H = 20;
 
     int tick_n = 0;
     bool running = true;
@@ -733,6 +731,22 @@ void run(bool visualize) {
                 } else if (k == Key::NEXT) {
                     clear_screen();
                     break;
+                } else if (k == Key::DEBUG) {
+                    for (int i = 0; i < rats.size(); i++) {
+                        if ((rats[i]->pos[0] == VIEW_X) && (rats[i]->pos[1] == VIEW_Y)) {
+                            std::printf("Rat[%d] - Weight: %d\n", i, rats[i]->weight);
+                        }
+                    }
+                    for (int i = 0; i < cheese.size(); i++) {
+                        if ((cheese[i]->pos[0] == VIEW_X) && (cheese[i]->pos[1] == VIEW_Y)) {
+                            std::printf("Cheese[%d] - Count: %d\n", i, cheese[i]->count);
+                        }
+                    }
+                    for (int i = 0; i < pills.size(); i++) {
+                        if ((pills[i]->pos[0] == VIEW_X) && (pills[i]->pos[1] == VIEW_Y)) {
+                            std::printf("Pill[%d] - Count: %d\n", i, pills[i]->count);
+                        }
+                    }
                 } else if (k == Key::QUIT) {
                     clear_screen();
                     running = false;
