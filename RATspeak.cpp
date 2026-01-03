@@ -1,7 +1,17 @@
 #include "front/parser.h"
 #include "runtime/runtime.h"
 
+/*
+TO DO:
+
+Optimize finding objects
+Add wall updates to remove overlapping wall
+*/
+
 int main(int argc, char* argv[]) {
+    std::string file_name = "";
+    bool visualize = false;
+
     if (argc < 2) {
         std::cout << "__________    ________________                           __    \n";
         std::cout << "\\______   \\  /  _  \\__    ___/___________   ____ _____  |  | __\n";
@@ -12,23 +22,38 @@ int main(int argc, char* argv[]) {
         std::cout << "Version 2.0 - Created by Michael Torres\n";
 
         return 0;
-    } else if (argc > 2) {
-        std::cerr << "Invalid number of arguments; try \"RATspeak filename\" or \"RATspeak -e\"\n";
-        return 1;
+    } else {
+        for (int i = 1; i < argc; i++) {
+            std::string arg = argv[i];
+
+            if (arg[0] == '-') {
+                if (arg == "-e") {
+                    std::cout << "🐀🧀💊🕳 🏭🧪🧱🗑 🔼🧵📡☣ \n";
+                } else if (arg == "-v") {
+                    visualize = true;
+                } else {
+                    std::cerr << "Invalid arguments: " + arg + "\n";
+                    return 1;
+                }
+            } else {
+                if (file_name == "") {
+                    file_name = arg;
+                } else {
+                    std::cerr << "Invalid number of arguments; try \"RATspeak filename\" or \"RATspeak -e\"\n";
+                    return 1;
+                }
+            }
+        }
     }
 
-    if (((std::string) argv[1]) == "-e") {
-        std::cout << "🐀🧀💊🕳️🏭🧪🧱🗑️🔼🧵📡☣\n";
-        return 0;
-    }
-
-    std::string file_name = argv[1];
+    if (file_name == "") {return 0;}
+    
     try {
         Parser parser(file_name);
-        std::unique_ptr<Node> ast = parser.build_ast();
+        ast = parser.build_ast();
         // print_ast(ast.get());
-        call_func(((Program*) ast.get()), "squeak", 0, 0);
-        run();
+        build_func("squeak", 0, 0);
+        run(visualize);
 
     } catch (std::runtime_error e) {
         std::cerr << e.what() << std::endl;

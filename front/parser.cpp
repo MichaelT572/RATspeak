@@ -1,6 +1,6 @@
 #include "parser.h"
 
-const std::string built_in_funcs[13] = {"🐀", "🧀", "💊", "🕳️", "🏭", "🧪", "🧱", "🗑", "🔼", "🧵", "📡", "☣", "tile"};
+const std::string built_in_funcs[13] = {"🐀", "🧀", "💊", "🕳", "🏭", "🧪", "🧱", "🗑", "🔼", "🧵", "📡", "☣", "tile"};
 const int N_FUNCS = 13;
 
 Token::Token(token_type type, std::string value, int line) {
@@ -75,7 +75,7 @@ int has_arg_count(std::string id, int n) {
         if ((n != 2) && (n != 4)) {
             return false;
         }
-    } else if ((id == "🐀") || (id == "🧀") || (id == "💊") || (id == "🕳️") || (id == "🏭") || (id == "🧪") || (id == "📡")) {
+    } else if ((id == "🐀") || (id == "🧀") || (id == "💊") || (id == "🕳") || (id == "🏭") || (id == "🧪") || (id == "📡")) {
         if ((n != 2) && (n != 3)) {
             return false;
         }
@@ -306,7 +306,7 @@ std::unique_ptr<Node> Parser::parse_callexp() {
                 "; can only tile functions that accept exactly two arguments:\n\t" + get_line(tokens[token_i].line));
             }
 
-            call->args.push_back(std::make_unique<CallExpression>(tokens[token_i].value));
+            call->args.push_back(std::make_unique<Literal>(tokens[token_i].value));
             n_args++;
         } else {
             throw std::runtime_error("Unexpected value in argument list on line " + std::to_string(tokens[token_i].line + 1) + 

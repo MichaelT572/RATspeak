@@ -2,19 +2,21 @@
 #define RUNTIME_H
 
 #include "../front/parser.h"
+#include "display.h"
 #include <queue>
 #include <map>
 
-void call_func(Program* ast, std::string id, int offset_x, int offset_y);
-void run();
-
-class Cheese;
+extern std::unique_ptr<Node> ast;
+void build_func(std::string id, int offset_x, int offset_y);
+void run(bool visualize);
 
 class Obj {
 public:
     int pos[2];
+    std::string emoji;
 };
 
+class Cheese;
 class Rat : public Obj {
 public:
     int weight;
@@ -103,6 +105,7 @@ public:
 
     String(int x, int y);
     void activate(int strength);
+    void deactivate();
 };
 
 class Scanner : public Obj {
@@ -118,5 +121,19 @@ public:
     Poison(int x, int y);
 };
 
+
+
+extern std::vector<std::unique_ptr<Rat>> rats;
+extern std::vector<std::unique_ptr<Cheese>> cheese;
+extern std::vector<std::unique_ptr<Pill>> pills;
+extern std::vector<std::unique_ptr<RatGen>> ratgens;
+extern std::vector<std::unique_ptr<CheeseGen>> cheesegens;
+extern std::vector<std::unique_ptr<PillGen>> pillgens;
+extern std::vector<std::unique_ptr<Wall>> walls;
+extern std::vector<std::unique_ptr<Trash>> trash;
+extern std::vector<std::unique_ptr<Spring>> springs;
+extern std::vector<std::unique_ptr<String>> strings;
+extern std::vector<std::unique_ptr<Scanner>> scanners;
+extern std::vector<std::unique_ptr<Poison>> poison;
 
 #endif

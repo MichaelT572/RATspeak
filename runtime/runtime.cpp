@@ -18,6 +18,7 @@ std::vector<std::unique_ptr<Poison>> poison;
 Rat::Rat(int x, int y, int weight) {
     pos[0] = x; pos[1] = y;
     this->weight = weight;
+    emoji = "🐀";
 }
 void Rat::path_find() {
     path.clear();
@@ -124,6 +125,7 @@ bool Rat::can_smell(int x, int y) {
 Cheese::Cheese(int x, int y, int count) {
     pos[0] = x; pos[1] = y;
     this->count = count;
+    emoji = "🧀";
 }
 void Cheese::update() {
     int n = cheese.size();
@@ -152,6 +154,7 @@ void Cheese::update() {
 Pill::Pill(int x, int y, int count) {
     pos[0] = x; pos[1] = y;
     this->count = count;
+    emoji = "💊";
 }
 void Pill::update() {
     int n = pills.size();
@@ -168,18 +171,20 @@ void Pill::update() {
 RatGen::RatGen(int x, int y, int mode) {
     pos[0] = x; pos[1] = y;
     this->mode = mode;
+    emoji = "🕳 ";
 }
 void RatGen::activate() {
     if (!mode) {
-        std::unique_ptr<Rat> rat = std::make_unique<Rat>(pos[0], pos[1], strength);
+        std::unique_ptr<Rat> rat = std::make_unique<Rat>(pos[0], pos[1] + 1, strength);
         rat->path_find();
         rats.push_back(std::move(rat));
     } else {
+        std::cin.clear();
         std::string text;
         getline(std::cin, text);
 
-        for (int i = 0; i < text.size(); i++) {
-            std::unique_ptr<Rat> rat = std::make_unique<Rat>(pos[0], pos[1] + i, text[i]);
+        for (int i = text.size()-1; i >= 0; i--) {
+            std::unique_ptr<Rat> rat = std::make_unique<Rat>(pos[0], pos[1] + (text.size() - 1 - i) + 1, text[i]);
             rat->path_find();
             rats.push_back(std::move(rat));
         }
@@ -189,20 +194,20 @@ void RatGen::activate() {
 CheeseGen::CheeseGen(int x, int y, int mode) {
     pos[0] = x; pos[1] = y;
     this->mode = mode;
+    emoji = "🏭";
 }
 void CheeseGen::activate() {
     if (!mode) {
-        std::unique_ptr<Cheese> c = std::make_unique<Cheese>(pos[0], pos[1], strength);
-        c->update();
-        cheese.push_back(std::move(c));
+        cheese.push_back(std::make_unique<Cheese>(pos[0], pos[1] + 1, strength));
+        cheese[cheese.size() - 1]->update();
     } else {
+        std::cin.clear();
         std::string text;
         getline(std::cin, text);
 
-        for (int i = 0; i < text.size(); i++) {
-            std::unique_ptr<Cheese> c = std::make_unique<Cheese>(pos[0], pos[1] + i, text[i]);
-            c->update();
-            cheese.push_back(std::move(c));
+        for (int i = text.size()-1; i >= 0; i--) {
+            cheese.push_back(std::make_unique<Cheese>(pos[0], pos[1] + (text.size() - 1 - i) + 1, text[i]));
+            cheese[cheese.size() - 1]->update();
         }
     }
 }
@@ -210,48 +215,53 @@ void CheeseGen::activate() {
 PillGen::PillGen(int x, int y, int mode) {    
     pos[0] = x; pos[1] = y;
     this->mode = mode;
+    emoji = "🧪";
 }
 void PillGen::activate() {
     if (!mode) {
-        std::unique_ptr<Pill> p = std::make_unique<Pill>(pos[0], pos[1], strength);
-        p->update();
-        pills.push_back(std::move(p));
+        pills.push_back(std::make_unique<Pill>(pos[0], pos[1] + 1, strength));
+        pills[pills.size() - 1]->update();
     } else {
+        std::cin.clear();
         std::string text;
         getline(std::cin, text);
 
-        for (int i = 0; i < text.size(); i++) {
-            std::unique_ptr<Pill> p = std::make_unique<Pill>(pos[0], pos[1] + i, text[i]);
-            p->update();
-            pills.push_back(std::move(p));
+        for (int i = text.size()-1; i >= 0; i--) {
+            pills.push_back(std::make_unique<Pill>(pos[0], pos[1] + (text.size() - 1 - i) + 1, text[i]));
+            pills[pills.size() - 1]->update();
         }
     }
 }
 
 Wall::Wall(int x, int y) {
     pos[0] = x; pos[1] = y;
+    emoji = "🧱";
 }
 
 Trash::Trash(int x, int y) {
     pos[0] = x; pos[1] = y;
+    emoji = "🗑 ";
 }
 
 Spring::Spring(int x1, int y1, int x2, int y2) {
     pos[0] = x1; pos[1] = y1;
     pos2[0] = x2; pos2[1] = y2;
+    emoji = "🔼";
 }
 void Spring::activate() {
     for (int i = 0; i < rats.size(); i++) {
-        if ((this->pos[0] == rats[i]->pos[0]) && (this->pos[1] == rats[i]->pos[1])) {
+        if ((pos[0] == rats[i]->pos[0]) && (pos[1] == rats[i]->pos[1])) {
             rats[i]->pos[0] = pos2[0];
             rats[i]->pos[1] = pos2[1];
 
-            rats[i]->seeking->seekers.erase(rats[i].get());
+            if (rats[i]->path.size() != 0) {
+                rats[i]->seeking->seekers.erase(rats[i].get());
+            }
             rats[i]->path_find();
         }
     }
     for (int i = 0; i < cheese.size(); i++) {
-        if ((this->pos[0] == cheese[i]->pos[0]) && (this->pos[1] == cheese[i]->pos[1])) {
+        if ((pos[0] == cheese[i]->pos[0]) && (pos[1] == cheese[i]->pos[1])) {
             Cheese* c = cheese[i].get();
             
             c->pos[0] = pos2[0];
@@ -261,7 +271,7 @@ void Spring::activate() {
         }
     }
     for (int i = 0; i < pills.size(); i++) {
-        if ((this->pos[0] == pills[i]->pos[0]) && (this->pos[1] == pills[i]->pos[1])) {
+        if ((pos[0] == pills[i]->pos[0]) && (pos[1] == pills[i]->pos[1])) {
             pills[i]->pos[0] = pos2[0];
             pills[i]->pos[1] = pos2[1];
             
@@ -272,6 +282,7 @@ void Spring::activate() {
 
 String::String(int x, int y) {
     pos[0] = x; pos[1] = y;
+    emoji = "🧵";
 }
 void String::activate(int strength) {
     active = true;
@@ -293,34 +304,44 @@ void String::activate(int strength) {
     for (PillGen* pg : conn_pillgens) {
         pg->strength += strength;
     }
-
+}
+void String::deactivate() {
     active = false;
+
+    for (String* string : conn_strings) {
+        if (string->active) {
+            string->deactivate();
+        }
+    }
 }
 
 Scanner::Scanner(int x, int y, int mode) {
-    this->mode = mode;
-
     pos[0] = x; pos[1] = y;
+    this->mode = mode;
+    emoji = "📡";
 }
 void Scanner::activate(int x) {
     if (mode) {
-        std::cout << x;
+        std::cout << x << std::flush;
     } else {
-        std::cout << (char) x;
+        std::cout << (char) x << std::flush;
     }
 }
 
 Poison::Poison(int x, int y) {
     pos[0] = x; pos[1] = y;
+    emoji = "☣ ";
 }
 
+std::unique_ptr<Node> ast;
 
-
-int find_funcdec(Program* ast, std::string id) {
+int find_funcdec(std::string id) {
     // Only nodes inside Program are funcdec
 
-    for (int i = 0; i < ast->body.size(); i++) {
-        FuncDec* func = (FuncDec*) ast->body[i].get();
+    Program* prog = (Program*) ast.get();
+
+    for (int i = 0; i < prog->body.size(); i++) {
+        FuncDec* func = (FuncDec*) prog->body[i].get();
         if (func->id == id) {
             return i;
         }
@@ -329,230 +350,244 @@ int find_funcdec(Program* ast, std::string id) {
     return -1;
 }
 
-void call_func(Program* ast, std::string id, int offset_x, int offset_y) {
+void call_func(CallExpression* call, int offset_x, int offset_y) {
+    if (call->id == "🐀") {
+        int x = std::stoi(((Literal*) call->args[0].get())->value) + offset_x;
+        int y = std::stoi(((Literal*) call->args[1].get())->value) + offset_y;
+        int weight = 0;
+        if (call->args.size() == 3) {
+            weight = std::stoi(((Literal*) call->args[2].get())->value);
+        }
+        rats.push_back(std::make_unique<Rat>(x, y, weight));
+
+    } else if (call->id == "🧀") {
+        int x = std::stoi(((Literal*) call->args[0].get())->value) + offset_x;
+        int y = std::stoi(((Literal*) call->args[1].get())->value) + offset_y;
+        int count = 1;
+        if (call->args.size() == 3) {
+            count = std::stoi(((Literal*) call->args[2].get())->value);
+        }
+        cheese.push_back(std::make_unique<Cheese>(x, y, count));
+
+    } else if (call->id == "💊") {
+        int x = std::stoi(((Literal*) call->args[0].get())->value) + offset_x;
+        int y = std::stoi(((Literal*) call->args[1].get())->value) + offset_y;
+        int count = 1;
+        if (call->args.size() == 3) {
+            count = std::stoi(((Literal*) call->args[2].get())->value);
+        }
+        std::unique_ptr<Pill> pill = std::make_unique<Pill>(x, y, count);
+        pill->update();
+        pills.push_back(std::move(pill));
+
+    } else if (call->id == "🕳") {
+        int x = std::stoi(((Literal*) call->args[0].get())->value) + offset_x;
+        int y = std::stoi(((Literal*) call->args[1].get())->value) + offset_y;
+        int mode = 0;
+        if (call->args.size() == 3) {
+            mode = std::stoi(((Literal*) call->args[2].get())->value);
+        }
+        std::unique_ptr<RatGen> rg = std::make_unique<RatGen>(x, y, mode);
+        for (int i = 0; i < strings.size(); i++) {
+            if ((strings[i]->pos[0] == x) && (strings[i]->pos[1] == y)) {
+                strings[i]->conn_ratgens.push_back(rg.get());
+            }
+        }
+        ratgens.push_back(std::move(rg));
+        
+    } else if (call->id == "🏭") {
+        int x = std::stoi(((Literal*) call->args[0].get())->value) + offset_x;
+        int y = std::stoi(((Literal*) call->args[1].get())->value) + offset_y;
+        int mode = 0;
+        if (call->args.size() == 3) {
+            mode = std::stoi(((Literal*) call->args[2].get())->value);
+        }
+        std::unique_ptr<CheeseGen> cg = std::make_unique<CheeseGen>(x, y, mode);
+        for (int i = 0; i < strings.size(); i++) {
+            if ((strings[i]->pos[0] == x) && (strings[i]->pos[1] == y)) {
+                strings[i]->conn_cheesegens.push_back(cg.get());
+            }
+        }
+        cheesegens.push_back(std::move(cg));
+
+    } else if (call->id == "🧪") {
+        int x = std::stoi(((Literal*) call->args[0].get())->value) + offset_x;
+        int y = std::stoi(((Literal*) call->args[1].get())->value) + offset_y;
+        int mode = 0;
+        if (call->args.size() == 3) {
+            mode = std::stoi(((Literal*) call->args[2].get())->value);
+        }
+        std::unique_ptr<PillGen> pg = std::make_unique<PillGen>(x, y, mode);
+        for (int i = 0; i < strings.size(); i++) {
+            if ((strings[i]->pos[0] == x) && (strings[i]->pos[1] == y)) {
+                strings[i]->conn_pillgens.push_back(pg.get());
+            }
+        }
+        pillgens.push_back(std::move(pg));
+
+    } else if (call->id == "📡") {
+        int x = std::stoi(((Literal*) call->args[0].get())->value) + offset_x;
+        int y = std::stoi(((Literal*) call->args[1].get())->value) + offset_y;
+        int mode = 0;
+        if (call->args.size() == 3) {
+            mode = std::stoi(((Literal*) call->args[2].get())->value);
+        }
+        scanners.push_back(std::make_unique<Scanner>(x, y, mode));
+    
+    } else if (call->id == "🧱") {
+        int x1 = std::stoi(((Literal*) call->args[0].get())->value) + offset_x;
+        int y1 = std::stoi(((Literal*) call->args[1].get())->value) + offset_y;
+        int x2 = x1;
+        int y2 = y1;
+        if (call->args.size() == 4) {
+            x2 = std::stoi(((Literal*) call->args[2].get())->value) + offset_x;
+            y2 = std::stoi(((Literal*) call->args[3].get())->value) + offset_y;
+        }
+
+        if ((x1 != x2) && (y1 != y2)) {
+            throw std::runtime_error("Invalid arguments on line " + std::to_string(call->line) +
+                    " in 🧱; lines can only be made orthogonally");
+        }
+        
+        if (x1 > x2) {
+            int temp = x1;
+            x1 = x2;
+            x2 = temp;
+        }
+        if (y1 > y2) {
+            int temp = y1;
+            y1 = y2;
+            y2 = temp;
+        }
+
+        for (int x = x1; x <= x2; x++) {
+            for (int y = y1; y <= y2; y++) {
+                walls.push_back(std::make_unique<Wall>(x, y));
+            }
+        }
+
+    } else if (call->id == "🗑") {
+        int x = std::stoi(((Literal*) call->args[0].get())->value) + offset_x;
+        int y = std::stoi(((Literal*) call->args[1].get())->value) + offset_y;
+        trash.push_back(std::make_unique<Trash>(x, y));
+
+    } else if (call->id == "🔼") {
+        int x1 = std::stoi(((Literal*) call->args[0].get())->value) + offset_x;
+        int y1 = std::stoi(((Literal*) call->args[1].get())->value) + offset_y;
+        int x2 = std::stoi(((Literal*) call->args[2].get())->value) + offset_x;
+        int y2 = std::stoi(((Literal*) call->args[3].get())->value) + offset_y;
+
+        std::unique_ptr<Spring> spring = std::make_unique<Spring>(x1, y1, x2, y2);
+        for (int i = 0; i < strings.size(); i++) {
+            if ((strings[i]->pos[0] == x1) && (strings[i]->pos[1] == y1)) {
+                strings[i]->conn_springs.push_back(spring.get());
+            }
+        }
+        springs.push_back(std::move(spring));
+
+    } else if (call->id == "🧵") {
+        int x1 = std::stoi(((Literal*) call->args[0].get())->value) + offset_x;
+        int y1 = std::stoi(((Literal*) call->args[1].get())->value) + offset_y;
+        int x2 = x1;
+        int y2 = y1;
+        if (call->args.size() == 4) {
+            x2 = std::stoi(((Literal*) call->args[2].get())->value) + offset_x;
+            y2 = std::stoi(((Literal*) call->args[3].get())->value) + offset_y;
+        }
+
+        if ((x1 != x2) && (y1 != y2)) {
+            throw std::runtime_error("Invalid arguments on line " + std::to_string(call->line) +
+                    " in 🧵; lines can only be made orthogonally");
+        }
+        
+        if (x1 > x2) {
+            int temp = x1;
+            x1 = x2;
+            x2 = temp;
+        }
+        if (y1 > y2) {
+            int temp = y1;
+            y1 = y2;
+            y2 = temp;
+        }
+
+        String* last_string;
+        for (int x = x1; x <= x2; x++) {
+            for (int y = y1; y <= y2; y++) {
+                std::unique_ptr<String> string = std::make_unique<String>(x, y);
+                if (((x == x1) && (y == y1)) || ((x == x2) && (y == y2))) {
+                    for (int i = 0; i < strings.size(); i++) {
+                        if ((strings[i]->pos[0] == x) && (strings[i]->pos[1] == y)) {
+                            strings[i]->conn_strings.push_back(string.get());
+                            string->conn_strings.push_back(strings[i].get());
+                        }
+                    }
+                }
+                if ((x != x1) || (y != y1)) {
+                    last_string->conn_strings.push_back(string.get());
+                    string->conn_strings.push_back(last_string);
+                }
+
+                last_string = string.get();
+                strings.push_back(std::move(string));
+            }
+        }
+    } else if (call->id == "☣") {
+        int x = std::stoi(((Literal*) call->args[0].get())->value) + offset_x;
+        int y = std::stoi(((Literal*) call->args[1].get())->value) + offset_y;
+        poison.push_back(std::make_unique<Poison>(x, y));
+
+    } else if (call->id == "tile") {
+        std::string tile_func = ((Literal*) call->args[0].get())->value;
+        int x1 = std::stoi(((Literal*) call->args[1].get())->value) + offset_x;
+        int y1 = std::stoi(((Literal*) call->args[2].get())->value) + offset_y;
+        int x2 = std::stoi(((Literal*) call->args[3].get())->value) + offset_x;
+        int y2 = std::stoi(((Literal*) call->args[4].get())->value) + offset_y;
+
+        if (x1 > x2) {
+            int temp = x1;
+            x1 = x2;
+            x2 = temp;
+        }
+        if (y1 > y2) {
+            int temp = y1;
+            y1 = y2;
+            y2 = temp;
+        }
+
+        std::unique_ptr<CallExpression> new_call = std::make_unique<CallExpression>(tile_func);
+        new_call->args.push_back(std::make_unique<Literal>(std::to_string(x1)));
+        new_call->args.push_back(std::make_unique<Literal>(std::to_string(x2)));
+
+        for (int x = x1; x <= x2; x++) {
+            for (int y = y1; y <= y2; y++) {
+                ((Literal*) new_call->args[0].get())->value = std::to_string(x);
+                ((Literal*) new_call->args[1].get())->value = std::to_string(y);
+                call_func(new_call.get(), 0, 0);
+            }
+        }
+
+    } else {
+        int x = std::stoi(((Literal*) call->args[0].get())->value) + offset_x;
+        int y = std::stoi(((Literal*) call->args[1].get())->value) + offset_y;
+        build_func(call->id, x, y);
+    }
+}
+
+void build_func(std::string id, int offset_x, int offset_y) {
     // Only nodes inside funcdec are call expressions
 
-    int func_i = find_funcdec(ast, id);
+    int func_i = find_funcdec(id);
     if (func_i == -1) {return;}
-    FuncDec* func = ((FuncDec*) ast->body[func_i].get());
+
+    Program* prog = (Program*) ast.get();    
+    FuncDec* func = ((FuncDec*) prog->body[func_i].get());
+    
 
     for (int i = 0; i < func->body.size(); i++) {
         CallExpression* call = (CallExpression*) func->body[i].get();
-        
-        if (call->id == "🐀") {
-            int x = std::stoi(((Literal*) call->args[0].get())->value) + offset_x;
-            int y = std::stoi(((Literal*) call->args[1].get())->value) + offset_y;
-            int weight = 0;
-            if (call->args.size() == 3) {
-                weight = std::stoi(((Literal*) call->args[2].get())->value);
-            }
-            rats.push_back(std::make_unique<Rat>(x, y, weight));
 
-        } else if (call->id == "🧀") {
-            int x = std::stoi(((Literal*) call->args[0].get())->value) + offset_x;
-            int y = std::stoi(((Literal*) call->args[1].get())->value) + offset_y;
-            int count = 1;
-            if (call->args.size() == 3) {
-                count = std::stoi(((Literal*) call->args[2].get())->value);
-            }
-            cheese.push_back(std::make_unique<Cheese>(x, y, count));
-
-        } else if (call->id == "💊") {
-            int x = std::stoi(((Literal*) call->args[0].get())->value) + offset_x;
-            int y = std::stoi(((Literal*) call->args[1].get())->value) + offset_y;
-            int count = 1;
-            if (call->args.size() == 3) {
-                count = std::stoi(((Literal*) call->args[2].get())->value);
-            }
-            std::unique_ptr<Pill> pill = std::make_unique<Pill>(x, y, count);
-            pill->update();
-            pills.push_back(std::move(pill));
-
-        } else if (call->id == "🕳️") {
-            int x = std::stoi(((Literal*) call->args[0].get())->value) + offset_x;
-            int y = std::stoi(((Literal*) call->args[1].get())->value) + offset_y;
-            int mode = 0;
-            if (call->args.size() == 3) {
-                mode = std::stoi(((Literal*) call->args[2].get())->value);
-            }
-            std::unique_ptr<RatGen> rg = std::make_unique<RatGen>(x, y, mode);
-            for (int i = 0; i < strings.size(); i++) {
-                if ((strings[i]->pos[0] == x) && (strings[i]->pos[1] == y)) {
-                    strings[i]->conn_ratgens.push_back(rg.get());
-                }
-            }
-            ratgens.push_back(std::move(rg));
-            
-        } else if (call->id == "🏭") {
-            int x = std::stoi(((Literal*) call->args[0].get())->value) + offset_x;
-            int y = std::stoi(((Literal*) call->args[1].get())->value) + offset_y;
-            int mode = 0;
-            if (call->args.size() == 3) {
-                mode = std::stoi(((Literal*) call->args[2].get())->value);
-            }
-            std::unique_ptr<CheeseGen> cg = std::make_unique<CheeseGen>(x, y, mode);
-            for (int i = 0; i < strings.size(); i++) {
-                if ((strings[i]->pos[0] == x) && (strings[i]->pos[1] == y)) {
-                    strings[i]->conn_cheesegens.push_back(cg.get());
-                }
-            }
-            cheesegens.push_back(std::move(cg));
-
-        } else if (call->id == "🧪") {
-            int x = std::stoi(((Literal*) call->args[0].get())->value) + offset_x;
-            int y = std::stoi(((Literal*) call->args[1].get())->value) + offset_y;
-            int mode = 0;
-            if (call->args.size() == 3) {
-                mode = std::stoi(((Literal*) call->args[2].get())->value);
-            }
-            std::unique_ptr<PillGen> pg = std::make_unique<PillGen>(x, y, mode);
-            for (int i = 0; i < strings.size(); i++) {
-                if ((strings[i]->pos[0] == x) && (strings[i]->pos[1] == y)) {
-                    strings[i]->conn_pillgens.push_back(pg.get());
-                }
-            }
-            pillgens.push_back(std::move(pg));
-
-        } else if (call->id == "📡") {
-            int x = std::stoi(((Literal*) call->args[0].get())->value) + offset_x;
-            int y = std::stoi(((Literal*) call->args[1].get())->value) + offset_y;
-            int mode = 0;
-            if (call->args.size() == 3) {
-                mode = std::stoi(((Literal*) call->args[2].get())->value);
-            }
-            scanners.push_back(std::make_unique<Scanner>(x, y, mode));
-        
-        } else if (call->id == "🧱") {
-            int x1 = std::stoi(((Literal*) call->args[0].get())->value) + offset_x;
-            int y1 = std::stoi(((Literal*) call->args[1].get())->value) + offset_y;
-            int x2 = x1;
-            int y2 = y1;
-            if (call->args.size() == 4) {
-                x2 = std::stoi(((Literal*) call->args[2].get())->value) + offset_x;
-                y2 = std::stoi(((Literal*) call->args[3].get())->value) + offset_y;
-            }
-
-            if ((x1 != x2) && (y1 != y2)) {
-                throw std::runtime_error("Invalid arguments on line " + std::to_string(call->line) +
-                        " in 🧱; lines can only be made orthogonally");
-            }
-            
-            if (x1 > x2) {
-                int temp = x1;
-                x1 = x2;
-                x2 = temp;
-            }
-            if (y1 > y2) {
-                int temp = y1;
-                y1 = y2;
-                y2 = temp;
-            }
-
-            for (int x = x1; x <= x2; x++) {
-                for (int y = y1; y <= y2; y++) {
-                    walls.push_back(std::make_unique<Wall>(x, y));
-                }
-            }
-
-        } else if (call->id == "🗑️") {
-            int x = std::stoi(((Literal*) call->args[0].get())->value) + offset_x;
-            int y = std::stoi(((Literal*) call->args[1].get())->value) + offset_y;
-            trash.push_back(std::make_unique<Trash>(x, y));
-
-        } else if (call->id == "🔼") {
-            int x1 = std::stoi(((Literal*) call->args[0].get())->value) + offset_x;
-            int y1 = std::stoi(((Literal*) call->args[1].get())->value) + offset_y;
-            int x2 = std::stoi(((Literal*) call->args[2].get())->value) + offset_x;
-            int y2 = std::stoi(((Literal*) call->args[3].get())->value) + offset_y;
-
-            std::unique_ptr<Spring> spring = std::make_unique<Spring>(x1, y1, x2, y2);
-            for (int i = 0; i < strings.size(); i++) {
-                if ((strings[i]->pos[0] == x1) && (strings[i]->pos[1] == y1)) {
-                    strings[i]->conn_springs.push_back(spring.get());
-                }
-            }
-            springs.push_back(std::move(spring));
-
-        } else if (call->id == "🧵") {
-            int x1 = std::stoi(((Literal*) call->args[0].get())->value) + offset_x;
-            int y1 = std::stoi(((Literal*) call->args[1].get())->value) + offset_y;
-            int x2 = x1;
-            int y2 = y1;
-            if (call->args.size() == 4) {
-                x2 = std::stoi(((Literal*) call->args[2].get())->value) + offset_x;
-                y2 = std::stoi(((Literal*) call->args[3].get())->value) + offset_y;
-            }
-
-            if ((x1 != x2) && (y1 != y2)) {
-                throw std::runtime_error("Invalid arguments on line " + std::to_string(call->line) +
-                        " in 🧵; lines can only be made orthogonally");
-            }
-            
-            if (x1 > x2) {
-                int temp = x1;
-                x1 = x2;
-                x2 = temp;
-            }
-            if (y1 > y2) {
-                int temp = y1;
-                y1 = y2;
-                y2 = temp;
-            }
-
-            String* last_string;
-            for (int x = x1; x <= x2; x++) {
-                for (int y = y1; y <= y2; y++) {
-                    std::unique_ptr<String> string = std::make_unique<String>(x, y);
-                    if (((x == x1) && (y == y1)) || ((x == x2) && (y == y2))) {
-                        for (int i = 0; i < strings.size(); i++) {
-                            if ((strings[i]->pos[0] == x) && (strings[i]->pos[1] == y)) {
-                                strings[i]->conn_strings.push_back(string.get());
-                            }
-                        }
-                    }
-                    if ((x != x1) || (y != y1)) {
-                        last_string->conn_strings.push_back(string.get());
-                        string->conn_strings.push_back(last_string);
-                    }
-
-                    last_string = string.get();
-                    strings.push_back(std::move(string));
-                }
-            }
-        } else if (call->id == "☣") {
-            int x = std::stoi(((Literal*) call->args[0].get())->value) + offset_x;
-            int y = std::stoi(((Literal*) call->args[1].get())->value) + offset_y;
-            poison.push_back(std::make_unique<Poison>(x, y));
-
-        } else if (call->id == "tile") {
-            std::string tile_func = ((Literal*) call->args[0].get())->value;
-            int x1 = std::stoi(((Literal*) call->args[1].get())->value) + offset_x;
-            int y1 = std::stoi(((Literal*) call->args[2].get())->value) + offset_y;
-            int x2 = std::stoi(((Literal*) call->args[3].get())->value) + offset_x;
-            int y2 = std::stoi(((Literal*) call->args[4].get())->value) + offset_y;
-
-            if (x1 > x2) {
-                int temp = x1;
-                x1 = x2;
-                x2 = temp;
-            }
-            if (y1 > y2) {
-                int temp = y1;
-                y1 = y2;
-                y2 = temp;
-            }
-
-            for (int x = x1; x <= x2; x++) {
-                for (int y = y1; y <= y2; y++) {
-                    call_func(ast, tile_func, x, y);
-                }
-            }
-
-        } else {
-            int x = std::stoi(((Literal*) call->args[0].get())->value) + offset_x;
-            int y = std::stoi(((Literal*) call->args[1].get())->value) + offset_y;
-            call_func(ast, call->id, x, y);
-        }
+        call_func(call, offset_x, offset_y);
     }
 }
 
@@ -561,7 +596,7 @@ bool tick() {
         Rat* rat = rats[i].get();
         
         rat->move_next();
-
+ 
         for (int j = cheese.size() - 1; j >= 0; j--) {
             Cheese* c = cheese[j].get();
             if ((c->pos[0] == rat->pos[0]) && (c->pos[1] == rat->pos[1])) {
@@ -575,6 +610,7 @@ bool tick() {
                 }
             }
         }
+
 
         for (int j = pills.size() - 1; j >= 0; j--) {
             Pill* p = pills[j].get();
@@ -591,8 +627,9 @@ bool tick() {
                     && (strings[j]->conn_cheesegens.size() == 0)
                     && (strings[j]->conn_pillgens.size() == 0)
                     && (strings[j]->conn_springs.size() == 0)) {
-                    
+                        
                         strings[j]->activate(rat->weight);
+                        strings[j]->deactivate();
                 }
             }
         }
@@ -664,19 +701,57 @@ bool tick() {
     return true;
 }
 
-void run() {
+void run(bool visualize) {
     for (int i = 0; i < cheese.size(); i++) {
         Cheese* c = cheese[i].get();
         c->update();
     }
 
+    VIEW_X = 0;
+    VIEW_Y = 0;
+    VIEW_W = 40;
+    VIEW_H = 20;
+
     int tick_n = 0;
-    while (tick()) {
-        // std::cout << "Tick " << tick_n << ": " << cheese.size() << std::endl;
-        // for (int i = 0; i < cheese.size(); i++) {
-        //     std::cout << "- " << cheese[i]->count << std::endl;
-        // }
+    bool running = true;
+    while (running) {
+        if (visualize) {  
+            render();
+            std::printf("tick %d - (%d, %d)\n", tick_n, VIEW_X, VIEW_Y);
+            init_input();
+            while (true) {
+                Key k = poll_key();
+
+                if (k == Key::L) {
+                    VIEW_X--;
+                } else if (k == Key::R) {
+                    VIEW_X++;
+                } else if (k == Key::U) {
+                    VIEW_Y++;
+                } else if (k == Key::D) {
+                    VIEW_Y--;
+                } else if (k == Key::NEXT) {
+                    clear_screen();
+                    break;
+                } else if (k == Key::QUIT) {
+                    clear_screen();
+                    running = false;
+                    break;
+                }
+
+                if ((k == Key::L) || (k == Key::R) || (k == Key::D) || (k == Key::U)) {
+                    clear_screen();
+                    render();
+                    std::printf("tick %d - (%d, %d)\n", tick_n, VIEW_X, VIEW_Y);
+                }
+                
+                usleep(1000);
+            }
+            shutdown_input();
+        }
+        if (!running) {break;}
 
         tick_n++;
+        running = tick();
     }
 }
